@@ -7,12 +7,13 @@ from kernel_tuner.accuracy import TunablePrecision
 def parse_cli():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-n", "--size", help="Size of the arrays (in elements)", required=True
+        "-n", "--size", help="Size of the arrays (in elements)", required=True, type=int
     )
+    parser.add_argument("--float", help="Use single precision", action="store_true")
     return parser.parse_args()
 
 
-def tune_copy(size: int):
+def tune_copy(size: int, type: str):
     with open("stream.cu", "r") as file:
         source = file.read()
 
@@ -25,7 +26,7 @@ def tune_copy(size: int):
 
     tune_params = dict()
     tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
-    tune_params["TYPE"] = ["float"]
+    tune_params["TYPE"] = [type]
 
     results, env = tune_kernel(
         "copy", source, size, args, tune_params, answer=answer, lang="cupy"
@@ -33,5 +34,9 @@ def tune_copy(size: int):
 
 
 arguments = parse_cli()
+if arguments.float:
+    type = "float"
+else:
+    type = "double"
 print("Tuning copy")
-tune_copy(arguments.size)
+tune_copy(arguments.size, type)
