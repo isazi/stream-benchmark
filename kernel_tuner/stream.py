@@ -10,6 +10,7 @@ def parse_cli():
         "-n", "--size", help="Size of the arrays (in elements)", required=True, type=int
     )
     parser.add_argument("--float", help="Use single precision", action="store_true")
+    parser.add_argument("--half", help="Use half precision", action="store_true")
     return parser.parse_args()
 
 
@@ -28,14 +29,14 @@ def tune_copy(size: int, type: str):
     tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
     tune_params["TYPE"] = [type]
 
-    results, env = tune_kernel(
-        "copy", source, size, args, tune_params, answer=answer, lang="cupy"
-    )
+    tune_kernel("copy", source, size, args, tune_params, answer=answer, lang="cupy")
 
 
 arguments = parse_cli()
 if arguments.float:
     type = "float"
+elif arguments.half:
+    type = "half"
 else:
     type = "double"
 print("Tuning copy")
