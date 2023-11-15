@@ -23,7 +23,13 @@ def tune_copy(size: int):
     args = [TunablePrecision("TYPE", a), TunablePrecision("TYPE", c), n]
     answer = [None, a, None]
 
-    results, env = tune_kernel("copy", source, size, args, answer=answer, lang="cupy")
+    tune_params = dict()
+    tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
+    tune_params["TYPE"] = ["float"]
+
+    results, env = tune_kernel(
+        "copy", source, size, args, tune_params, answer=answer, lang="cupy"
+    )
 
 
 arguments = parse_cli()
