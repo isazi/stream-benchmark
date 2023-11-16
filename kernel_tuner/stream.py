@@ -44,6 +44,43 @@ def tune_copy(size: int, type: str, elem_size: int):
     )
 
 
+def tune_scale(size: int, type: str, elem_size: int):
+    with open("stream.cu", "r") as file:
+        source = file.read()
+
+    n = np.int32(size)
+    scalar = np.float64(3.0)
+    c = np.random.randn(size).astype(np.float64)
+    b = np.zeros(size).astype(np.float64)
+
+    args = [
+        TunablePrecision("TYPE", scalar),
+        TunablePrecision("TYPE", b),
+        TunablePrecision("TYPE", c),
+        n,
+    ]
+    answer = [None, c * scalar, None, None]
+
+    tune_params = dict()
+    tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
+    tune_params["TYPE"] = [type]
+
+    metrics = dict()
+    metrics["GFLOP/s"] = lambda p: (size / 10**9) / (p["time"] / 10**3)
+    metrics["GB/s"] = lambda p: (2 * elem_size * size / 10**9) / (p["time"] / 10**3)
+
+    tune_kernel(
+        "scale",
+        source,
+        size,
+        args,
+        tune_params,
+        answer=answer,
+        lang="cupy",
+        metrics=metrics,
+    )
+
+
 arguments = parse_cli()
 if arguments.float:
     type = "float"
@@ -56,3 +93,5 @@ else:
     elem_size = 8
 print("Tuning copy")
 tune_copy(arguments.size, type, elem_size)
+print("Tuning scale")
+tune_scale(arguments.size, type, elem_size)
