@@ -22,12 +22,12 @@ def tune_copy(size: int, type: str, elem_size: int):
     a = np.random.randn(size).astype(np.float64)
     c = np.zeros(size).astype(np.float64)
 
-    args = [TunablePrecision("TYPE", a), TunablePrecision("TYPE", c), n]
+    args = [TunablePrecision("T", a), TunablePrecision("T", c), n]
     answer = [None, a, None]
 
     tune_params = dict()
     tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
-    tune_params["TYPE"] = [type]
+    tune_params["T"] = [type]
 
     metrics = dict()
     metrics["GB/s"] = lambda p: (2 * elem_size * size / 10**9) / (p["time"] / 10**3)

@@ -1,7 +1,8 @@
 #include <cuda_fp16.h>
 using half = __half;
 
-__global__ void copy(const TYPE* a, TYPE* c, const int size) {
+template<typename T>
+__global__ void copy(const T* a, T* c, const int size) {
     int i = (blockIdx.x * blockDim.x) + threadIdx.x;
     if ( i < size ) {
         c[i] = a[i];
