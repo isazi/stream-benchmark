@@ -186,6 +186,13 @@ def tune_stream(size: int, type: str, elem_size: int):
         TunablePrecision("float_type", c),
         n,
     ]
+    answer = [
+        None,
+        (scalar * a) + scalar * (a + scalar * a),
+        scalar * a,
+        a + scalar * a,
+        None,
+    ]
 
     tune_params = dict()
     tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
@@ -205,6 +212,7 @@ def tune_stream(size: int, type: str, elem_size: int):
         size,
         args,
         tune_params,
+        answer=answer,
         observers=observers,
         lang="cupy",
         metrics=metrics,
