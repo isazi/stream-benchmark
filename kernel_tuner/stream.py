@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 from kernel_tuner import tune_kernel
-from kernel_tuner.accuracy import TunablePrecision
+from kernel_tuner.accuracy import TunablePrecision, AccuracyObserver
 
 
 def parse_cli():
@@ -22,15 +22,17 @@ def tune_copy(size: int, type: str, elem_size: int):
     a = np.random.randn(size).astype(np.float64)
     c = np.zeros(size).astype(np.float64)
 
-    args = [TunablePrecision("TYPE", a), TunablePrecision("TYPE", c), n]
+    args = [TunablePrecision("float_type", a), TunablePrecision("float_type", c), n]
     answer = [None, a, None]
 
     tune_params = dict()
     tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
-    tune_params["TYPE"] = [type]
+    tune_params["float_type"] = [type]
 
     metrics = dict()
     metrics["GB/s"] = lambda p: (2 * elem_size * size / 10**9) / (p["time"] / 10**3)
+
+    observers = [AccuracyObserver()]
 
     tune_kernel(
         f"copy<{type}>",
@@ -39,6 +41,7 @@ def tune_copy(size: int, type: str, elem_size: int):
         args,
         tune_params,
         answer=answer,
+        observers=observers,
         lang="cupy",
         metrics=metrics,
     )
@@ -54,20 +57,22 @@ def tune_scale(size: int, type: str, elem_size: int):
     b = np.zeros(size).astype(np.float64)
 
     args = [
-        TunablePrecision("TYPE", scalar),
-        TunablePrecision("TYPE", b),
-        TunablePrecision("TYPE", c),
+        TunablePrecision("float_type", scalar),
+        TunablePrecision("float_type", b),
+        TunablePrecision("float_type", c),
         n,
     ]
     answer = [None, c * scalar, None, None]
 
     tune_params = dict()
     tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
-    tune_params["TYPE"] = [type]
+    tune_params["float_type"] = [type]
 
     metrics = dict()
     metrics["GFLOP/s"] = lambda p: (size / 10**9) / (p["time"] / 10**3)
     metrics["GB/s"] = lambda p: (2 * elem_size * size / 10**9) / (p["time"] / 10**3)
+
+    observers = [AccuracyObserver()]
 
     tune_kernel(
         f"scale<{type}>",
@@ -76,6 +81,7 @@ def tune_scale(size: int, type: str, elem_size: int):
         args,
         tune_params,
         answer=answer,
+        observers=observers,
         lang="cupy",
         metrics=metrics,
     )
@@ -91,20 +97,22 @@ def tune_add(size: int, type: str, elem_size: int):
     c = np.zeros(size).astype(np.float64)
 
     args = [
-        TunablePrecision("TYPE", a),
-        TunablePrecision("TYPE", b),
-        TunablePrecision("TYPE", c),
+        TunablePrecision("float_type", a),
+        TunablePrecision("float_type", b),
+        TunablePrecision("float_type", c),
         n,
     ]
     answer = [None, None, a + b, None]
 
     tune_params = dict()
     tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
-    tune_params["TYPE"] = [type]
+    tune_params["float_type"] = [type]
 
     metrics = dict()
     metrics["GFLOP/s"] = lambda p: (size / 10**9) / (p["time"] / 10**3)
     metrics["GB/s"] = lambda p: (3 * elem_size * size / 10**9) / (p["time"] / 10**3)
+
+    observers = [AccuracyObserver()]
 
     tune_kernel(
         f"add<{type}>",
@@ -113,6 +121,7 @@ def tune_add(size: int, type: str, elem_size: int):
         args,
         tune_params,
         answer=answer,
+        observers=observers,
         lang="cupy",
         metrics=metrics,
     )
@@ -129,21 +138,23 @@ def tune_triad(size: int, type: str, elem_size: int):
     c = np.zeros(size).astype(np.float64)
 
     args = [
-        TunablePrecision("TYPE", scalar),
-        TunablePrecision("TYPE", a),
-        TunablePrecision("TYPE", b),
-        TunablePrecision("TYPE", c),
+        TunablePrecision("float_type", scalar),
+        TunablePrecision("float_type", a),
+        TunablePrecision("float_type", b),
+        TunablePrecision("float_type", c),
         n,
     ]
     answer = [None, b + (scalar * c), None, None, None]
 
     tune_params = dict()
     tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
-    tune_params["TYPE"] = [type]
+    tune_params["float_type"] = [type]
 
     metrics = dict()
     metrics["GFLOP/s"] = lambda p: (2 * size / 10**9) / (p["time"] / 10**3)
     metrics["GB/s"] = lambda p: (3 * elem_size * size / 10**9) / (p["time"] / 10**3)
+
+    observers = [AccuracyObserver()]
 
     tune_kernel(
         f"triad<{type}>",
@@ -152,6 +163,7 @@ def tune_triad(size: int, type: str, elem_size: int):
         args,
         tune_params,
         answer=answer,
+        observers=observers,
         lang="cupy",
         metrics=metrics,
     )
@@ -168,16 +180,16 @@ def tune_stream(size: int, type: str, elem_size: int):
     c = np.random.randn(size).astype(np.float64)
 
     args = [
-        TunablePrecision("TYPE", scalar),
-        TunablePrecision("TYPE", a),
-        TunablePrecision("TYPE", b),
-        TunablePrecision("TYPE", c),
+        TunablePrecision("float_type", scalar),
+        TunablePrecision("float_type", a),
+        TunablePrecision("float_type", b),
+        TunablePrecision("float_type", c),
         n,
     ]
 
     tune_params = dict()
     tune_params["block_size_x"] = [32 * i for i in range(1, 33)]
-    tune_params["TYPE"] = [type]
+    tune_params["float_type"] = [type]
 
     metrics = dict()
     metrics["GFLOP/s"] = lambda p: (4 * size / 10**9) / (p["time"] / 10**3)
@@ -185,12 +197,15 @@ def tune_stream(size: int, type: str, elem_size: int):
         p["time"] / 10**3
     )
 
+    observers = [AccuracyObserver()]
+
     tune_kernel(
         f"stream<{type}>",
         source,
         size,
         args,
         tune_params,
+        observers=observers,
         lang="cupy",
         metrics=metrics,
     )
