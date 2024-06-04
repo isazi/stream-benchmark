@@ -13,7 +13,7 @@ const int n_blocks = ceil((1.0 * size) / threads);
 template<typename T>
 void array_init(std::mt19937 &generator, T* array, const int size) {
     for (int i = 0; i < size; i++) {
-        array[i] = std::generate_canonical<real>(generator);
+        array[i] = std::generate_canonical<real, 16>(generator);
     }
 }
 
