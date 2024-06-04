@@ -27,22 +27,24 @@ void check_final(const T* control_a, const T* a, const T* b, const T* c, const i
         temp = (scalar * control_a[i]) + scalar * (control_a[i] + scalar * control_a[i]);
         if ( abs(temp - a[i]) > error ) {
             std::cerr << "Error in a index " << i << std::endl;
+            std::cerr << temp << " " << a[i] << std::endl;
             break;
         }
         // check b
         temp = scalar * control_a[i];
         if ( abs(temp - b[i]) > error ) {
             std::cerr << "Error in b index " << i << std::endl;
+            std::cerr << temp << " " << b[i] << std::endl;
             break;
         }
         // check c
         temp = control_a[i] + scalar * control_a[i];
         if ( abs(temp - c[i]) > error ) {
             std::cerr << "Error in c index " << i << std::endl;
+            std::cerr << temp << " " << c[i] << std::endl;
             break;
         }
     }
-    std::cout << "Correct results" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
@@ -73,5 +75,6 @@ int main(int argc, char* argv[]) {
     // check results
     manager.submit(kmm::Host(), check_final<real>, control_a, a, b, c, size);
     manager.synchronize();
+    std::cout << "Correct results" << std::endl;
     return 0;
 }
