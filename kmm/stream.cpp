@@ -81,8 +81,8 @@ int main(int argc, char* argv[]) {
     manager.synchronize();
     // performance metrics
     const std::chrono::duration<double> elapsed_seconds{end - start};
-    double gflops = ((4 * size) / pow(10, 9)) / elapsed_seconds.count();
-    double gbs = ((10 * size * sizeof(real)) / pow(10, 9)) / elapsed_seconds.count();
+    double gflops = ((4.0 * size) / pow(10, 9)) / elapsed_seconds.count();
+    double gbs = ((10.0 * size * sizeof(real)) / pow(10, 9)) / elapsed_seconds.count();
     std::cout << "GFLOP/s " << gflops << std::endl;
     std::cout << "GB/s " << gbs << std::endl;
     return 0;
