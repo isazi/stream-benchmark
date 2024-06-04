@@ -26,15 +26,15 @@ int main(void) {
     auto a = kmm::Array<real>(size);
     auto b = kmm::Array<real>(size);
     auto c = kmm::Array<real>(size);
-    manager.submit(kmm::Host(), array_init, generator, write(a), size);
+    manager.submit(kmm::Host(), array_init<real>, generator, write(a), size);
     // copy
-    manager.submit(kmm::CudaKernel(n_blocks, threads), copy, a, write(c), size);
+    manager.submit(kmm::CudaKernel(n_blocks, threads), copy<real>, a, write(c), size);
     // scale
-    manager.submit(kmm::CudaKernel(n_blocks, threads), scale, scalar, write(b), c, size);
+    manager.submit(kmm::CudaKernel(n_blocks, threads), scale<real>, scalar, write(b), c, size);
     // add
-    manager.submit(kmm::CudaKernel(n_blocks, threads), add, a, b, write(c), size);
+    manager.submit(kmm::CudaKernel(n_blocks, threads), add<real>, a, b, write(c), size);
     // triad
-    manager.submit(kmm::CudaKernel(n_blocks, threads), triad, scalar, write(a), b, c, size);
+    manager.submit(kmm::CudaKernel(n_blocks, threads), triad<real>, scalar, write(a), b, c, size);
 
     manager.synchronize();
     return 0;
