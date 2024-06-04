@@ -6,7 +6,7 @@
 
 // constants
 using real = float;
-const real error = 1.0e-9;
+const real error = 1.0e-6;
 const real scalar = 3;
 
 template<typename T>
@@ -75,6 +75,5 @@ int main(int argc, char* argv[]) {
     // check results
     manager.submit(kmm::Host(), check_final<real>, control_a, a, b, c, size);
     manager.synchronize();
-    std::cout << "Correct results" << std::endl;
     return 0;
 }
