@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <chrono>
 #include <kmm/kmm.hpp>
 // CUDA kernels
 #include "../cuda/stream.cu"
@@ -22,7 +23,7 @@ void init(T* array, T* control, const int size) {
 template<typename T>
 void check_final(const T* control_a, const T* a, const T* b, const T* c, const int size) {
     for (int i = 0; i < size; i++) {
-        real temp = 0;
+        real temp;
         // check a
         temp = (scalar * control_a[i]) + scalar * (control_a[i] + scalar * control_a[i]);
         if ( abs(temp - a[i]) > error ) {
@@ -63,6 +64,8 @@ int main(int argc, char* argv[]) {
     auto b = kmm::Array<real>(size);
     auto c = kmm::Array<real>(size);
     manager.submit(kmm::Host(), init<real>, write(a), write(control_a), size);
+    manager.synchronize();
+    const auto start{std::chrono::steady_clock::now()};
     // copy
     manager.submit(kmm::CudaKernel(n_blocks, threads), copy<real>, a, write(c), size);
     // scale
@@ -72,8 +75,15 @@ int main(int argc, char* argv[]) {
     // triad
     manager.submit(kmm::CudaKernel(n_blocks, threads), triad<real>, scalar, write(a), b, c, size);
     manager.synchronize();
+    const auto end{std::chrono::steady_clock::now()};
     // check results
     manager.submit(kmm::Host(), check_final<real>, control_a, a, b, c, size);
     manager.synchronize();
+    // performance metrics
+    const std::chrono::duration<double> elapsed_seconds{end - start};
+    double gflops = ((4 * size) / pow(10, 9)) / elapsed_seconds.count();
+    double gbs = ((10 * size * sizeof(real)) / pow(10, 9)) / elapsed_seconds.count();
+    std::cout << "GFLOP/s " << gflops << std::endl;
+    std::cout << "GB/s " << gbs << std::endl;
     return 0;
 }
