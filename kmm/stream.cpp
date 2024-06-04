@@ -7,8 +7,6 @@
 // constants
 using real = float;
 const real scalar = 3;
-const int threads = 256;
-const int n_blocks = ceil((1.0 * size) / threads);
 
 template<typename T>
 void array_init(T* array, const int size) {
@@ -25,6 +23,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     const int size = atoi(argv[1]);
+    const int threads = 256;
+    const int n_blocks = ceil((1.0 * size) / threads);
     auto manager = kmm::build_runtime();
 
     // allocate and initialize
