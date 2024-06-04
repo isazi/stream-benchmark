@@ -15,7 +15,7 @@ def parse_cli():
 
 
 def tune_copy(size: int, type: str, elem_size: int):
-    with open("stream.cu", "r") as file:
+    with open("../cuda/stream.cu", "r") as file:
         source = file.read()
 
     n = np.int32(size)
@@ -48,7 +48,7 @@ def tune_copy(size: int, type: str, elem_size: int):
 
 
 def tune_scale(size: int, type: str, elem_size: int):
-    with open("stream.cu", "r") as file:
+    with open("../cuda/stream.cu", "r") as file:
         source = file.read()
 
     n = np.int32(size)
@@ -88,7 +88,7 @@ def tune_scale(size: int, type: str, elem_size: int):
 
 
 def tune_add(size: int, type: str, elem_size: int):
-    with open("stream.cu", "r") as file:
+    with open("../cuda/stream.cu", "r") as file:
         source = file.read()
 
     n = np.int32(size)
@@ -128,7 +128,7 @@ def tune_add(size: int, type: str, elem_size: int):
 
 
 def tune_triad(size: int, type: str, elem_size: int):
-    with open("stream.cu", "r") as file:
+    with open("../cuda/stream.cu", "r") as file:
         source = file.read()
 
     n = np.int32(size)
@@ -170,7 +170,7 @@ def tune_triad(size: int, type: str, elem_size: int):
 
 
 def tune_stream(size: int, type: str, elem_size: int):
-    with open("stream.cu", "r") as file:
+    with open("../cuda/stream.cu", "r") as file:
         source = file.read()
 
     n = np.int32(size)
