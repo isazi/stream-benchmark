@@ -1,3 +1,4 @@
+#include <iostream>
 #include <random>
 #include <kmm/kmm.hpp>
 // CUDA kernels
@@ -5,7 +6,6 @@
 
 // constants
 using real = float;
-const int size = 8192;
 const real scalar = 3;
 const int threads = 256;
 const int n_blocks = ceil((1.0 * size) / threads);
@@ -19,8 +19,12 @@ void array_init(T* array, const int size) {
     }
 }
 
-int main(void) {
-
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <size>" << std::endl;
+        return 1;
+    }
+    const int size = atoi(argv[1]);
     auto manager = kmm::build_runtime();
 
     // allocate and initialize
