@@ -1,9 +1,8 @@
 #include <iostream>
 #include <random>
-#include <chrono>
 #include <kmm/kmm.hpp>
 // CUDA kernels
-#include "../cuda/stream.cu"
+#include "../cuda/stream.cuh"
 
 // constants
 using real = float;
@@ -64,8 +63,6 @@ int main(int argc, char* argv[]) {
     auto b = kmm::Array<real>(size);
     auto c = kmm::Array<real>(size);
     manager.submit(kmm::Host(), init<real>, write(a), write(control_a), size);
-    manager.synchronize();
-    const auto start{std::chrono::steady_clock::now()};
     // copy
     manager.submit(kmm::CudaKernel(n_blocks, threads), copy<real>, a, write(c), size);
     // scale
@@ -74,16 +71,9 @@ int main(int argc, char* argv[]) {
     manager.submit(kmm::CudaKernel(n_blocks, threads), add<real>, a, b, write(c), size);
     // triad
     manager.submit(kmm::CudaKernel(n_blocks, threads), triad<real>, scalar, write(a), b, c, size);
-    manager.synchronize();
-    const auto end{std::chrono::steady_clock::now()};
     // check results
     manager.submit(kmm::Host(), check_final<real>, control_a, a, b, c, size);
     manager.synchronize();
-    // performance metrics
-    const std::chrono::duration<double> elapsed_seconds{end - start};
-    double gflops = ((4.0 * size) / pow(10, 9)) / elapsed_seconds.count();
-    double gbs = ((10.0 * size * sizeof(real)) / pow(10, 9)) / elapsed_seconds.count();
-    std::cout << "GFLOP/s " << gflops << std::endl;
-    std::cout << "GB/s " << gbs << std::endl;
+
     return 0;
 }
